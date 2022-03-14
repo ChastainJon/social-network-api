@@ -21,13 +21,17 @@ const userController = {
     },
     //find user by id
     getUserById({params}, res){
-        User.findOne({_id: params.id})
+        User.findOne({_id: params.userId})
             .populate({
                 path: 'thoughts',
                 select: '-__v'
             })
             .select('-__v')
-            .then(dbUserData => res.json(dbUserData))
+            .then(dbUserData => {
+                if(!dbUserData){
+                    res.status(404).json({message: 'No user found with this ID'})
+                }
+            })
             .catch(err => {
                 console.log(err)
                 res.json(err)
@@ -41,7 +45,7 @@ const userController = {
     },
     //update user
     updateUser({params, body}, res){ 
-        User.findOneAndUpdate({_id: params.id}, body, {new: true, runValidators: true})
+        User.findOneAndUpdate({_id: params.userId}, body, {new: true, runValidators: true})
             .then(dbUserData =>{
                 if(!dbUserData){
                     res.status(404).json({message: 'No user found with this ID'})
@@ -53,7 +57,7 @@ const userController = {
     },
     //delete user
     deleteUser({params}, res){
-        User.findOneAndDelete({_id: params.id})
+        User.findOneAndDelete({_id: params.userId})
             .then(dbUserData => res.json(dbUserData))
             .catch(err => res.json(err))
     },
@@ -78,7 +82,7 @@ const userController = {
             {$pull: {friends: {friendId: params.friendId}}},
             {new:true}
         )
-        .then(dbPizzaData => res.json(dbPizzaData))
+        .then(dbUserData => res.json(dbUserData))
         .catch(err => res.json(err))
     }
 
